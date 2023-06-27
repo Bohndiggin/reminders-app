@@ -1,5 +1,5 @@
 import random
-import time
+from datetime import date, time, datetime
 from faker import Faker
 fake = Faker()
 
@@ -9,8 +9,8 @@ class Avenue: # Avenues are ways to remind the user.
     
 
 class Reminder:
-    def __init__(self, text, target_time, fuzziness, avenues=[], frequency='once') -> None:
-        self.text = text
+    def __init__(self, reminder_name: str, target_time: datetime, fuzziness, avenues=[], frequency='once') -> None:
+        self.reminder_name = reminder_name
         self.target_time = target_time
         self.fuzziness = fuzziness
         self.avenues = avenues
