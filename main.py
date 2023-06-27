@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from datetime import date, time, datetime
 
+
 from PyQt6 import QtCore
 
 from utils import *
@@ -42,10 +43,10 @@ class NewReminderDialog(QDialog, ui_new_rmd.Ui_Dialog):
         reminder_freq = self.comboBox.currentIndex()
         reminder_fuzz = self.spinBox.value()
         data = {
-            'name': reminder_name,
-            'time': reminder_time,
-            'freq': reminder_freq,
-            'fuzz': reminder_fuzz
+            'reminder_name': reminder_name,
+            'target_time': reminder_time,
+            'frequency': reminder_freq,
+            'fuzziness': reminder_fuzz
         }
         return data
 
@@ -54,6 +55,17 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.connectSignalsSlots()
+        self.save_location = ''
+        self.reminders = []
+        self.frequencies = [
+            'Daily',
+            'Weekly',
+            'Monthly',
+            'Yearly',
+            'Other'
+        ]
+        self.comboBoxFrequency.addItems(self.frequencies)
+        self.listViewRemindersModel = QStandardItemModel()
 
     def connectSignalsSlots(self):
         self.actionNew_Reminder.triggered.connect(self.new_reminder_dialog)
@@ -79,17 +91,60 @@ class Window(QMainWindow, Ui_MainWindow):
     def new_reminder_dialog(self):
         self.dialog = NewReminderDialog(self)
         self.dialog.setModal(True)
+        self.dialog.comboBox.addItems(self.frequencies)
         if self.dialog.exec() == QDialog.DialogCode.Accepted:
             new_reminder_data = self.dialog.get_data()
-        print(new_reminder_data['fuzz'])
+        self.reminders.append(Reminder(**new_reminder_data))
+        self.refresh_ui()
+
+    def save_as(self, filepath=None):
+        def save_it(file_location):
+            try:
+                with open(file_location, 'w') as f:
+                    json_data = {
+                            'save_location': self.save_location,
+                            'reminders': self.reminders
+                    }
+                    json.dump(json_data, f, ensure_ascii=False, indent=4)
+            except Exception as e:
+                print(e)
+        if not filepath:
+            self.dialog = QFileDialog()
+            self.dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+            if self.dialog.exec():
+                selected_files = self.dialog.selectedFiles()
+            self.save_location = selected_files[0]
+            save_it(file_location=selected_files[0])
+        else:
+            self.save_location = filepath
+            save_it(file_location=self.save_location)
+        self.refresh_ui()
+    
+    def quicksave(self):
+        try:
+            self.save_as(filepath=self.save_location)
+        except Exception as e:
+            print(e)
+        finally:
+            pass
+
+    def refresh_ui(self):
+        self.listViewRemindersModel = QStandardItemModel()
+        for i in self.reminders:
+            new_item = QStandardItem(str(i))
+            self.listViewRemindersModel.appendRow(new_item)
+            self.listViewReminders.setModel(self.listViewRemindersModel)
 
     def placeholder_command(self):
         pass
+
+    def test(self):
+        self.save_as('C:/Users/bohnd/Documents/_codingProjects/reminders-app/ignore/test.json')
 
 if __name__ == '__main__':
     load_dotenv()
     app = QApplication(sys.argv)
     win = Window()
     win.show()
-    # win.test()
+    win.test()
     sys.exit(app.exec())

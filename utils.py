@@ -36,7 +36,7 @@ class Reminder:
         self.real_offset = fake.date_time_between(start_date=fore_fuzzy, end_date=aft_fuzzy)
 
     def __repr__(self) -> str:
-        return f'{self.text}, a task you need to do {self.frequency}'
+        return f'{self.reminder_name}, a task you need to do {self.frequency}'
     
 
 
