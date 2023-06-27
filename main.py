@@ -1,4 +1,3 @@
-from disp import *
 import sys
 import csv
 import json
