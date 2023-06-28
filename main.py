@@ -19,7 +19,7 @@ from PyQt6.uic import loadUi
 from PyQt6.QtGui import QStandardItemModel, QStandardItem, QTextCursor
 
 from ui_mw import Ui_MainWindow
-import ui_edit_dt, ui_new_rmd
+import ui_edit_dt, ui_new_rmd, ui_new_av
 
 class EditDateTimeDialog(QDialog, ui_edit_dt.Ui_Dialog):
     def __init__(self, parent: QWidget) -> None:
@@ -38,9 +38,17 @@ class NewReminderDialog(QDialog, ui_new_rmd.Ui_Dialog):
         self.setupUi(self)
 
     def get_data(self):
+        frequencies = [
+            'Once',
+            'Daily',
+            'Weekly',
+            'Monthly',
+            'Yearly',
+            'Other'            
+        ]
         reminder_name = self.lineEdit.text()
         reminder_time = self.timeEdit.time().toPyTime()
-        reminder_freq = self.comboBox.currentIndex()
+        reminder_freq = frequencies[self.comboBox.currentIndex()]
         reminder_fuzz = self.spinBox.value()
         data = {
             'reminder_name': reminder_name,
@@ -48,6 +56,15 @@ class NewReminderDialog(QDialog, ui_new_rmd.Ui_Dialog):
             'frequency': reminder_freq,
             'fuzziness': reminder_fuzz
         }
+        return data
+    
+class NewAvenueDialog(QDialog, ui_new_av.Ui_Dialog):
+    def __init__(self, parent: QWidget) -> None:
+        super().__init__(parent)
+        self.setupUi(self)
+    
+    def get_data(self):
+        data = []
         return data
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -57,7 +74,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.connectSignalsSlots()
         self.save_location = ''
         self.reminders = []
+        self.avenues = []
         self.frequencies = [
+            'Once',
             'Daily',
             'Weekly',
             'Monthly',
@@ -77,6 +96,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushButtonEditDueDate.clicked.connect(self.edit_date_time_dialog)
         self.pushButtonSaveChanges.clicked.connect(self.placeholder_command)
         self.pushButtonCancelChanges.clicked.connect(self.placeholder_command)
+        self.pushButtonAddAvenue.clicked.connect(self.placeholder_command)
         self.pushButtonAPI.clicked.connect(self.placeholder_command)
         self.pushButtonTest.clicked.connect(self.placeholder_command)
 
@@ -134,6 +154,12 @@ class Window(QMainWindow, Ui_MainWindow):
             new_item = QStandardItem(str(i))
             self.listViewRemindersModel.appendRow(new_item)
             self.listViewReminders.setModel(self.listViewRemindersModel)
+
+    def add_avenue_window(self):
+        self.dialog = NewAvenueDialog(self)
+        self.dialog.setModal(True)
+        if self.dialog.exec() == QDialog.DialogCode.Accepted:
+            new_reminder_data = self.dialog.get_data()
 
     def placeholder_command(self):
         pass
