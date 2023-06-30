@@ -9,44 +9,31 @@ import asyncio
 import time
 # from discord_bot import *
 import requests
+import json
 
 
 load_dotenv()
-
+server_url = os.getenv('SERVER_URL')
 
 fake = Faker()
 
 class Avenue: # Avenues are ways to remind the user.
-    def __init__(self, url) -> None:
+    def __init__(self, url, reminder_name: str, message: str, endpoint) -> None:
         self.url = url
-
-class GmailAvenue(Avenue):
-    def __init__(self, url) -> None:
-        super().__init__(url)
-
-    def remind(self, text):
-        pass
-
-class DiscordAvenue(Avenue):
-    def __init__(self, url, user_id, message) -> None:
-        super().__init__(url)
-        self.intents = discord.Intents.all()
-        self.user_id = user_id
-        self.discord_bot = commands.Bot(command_prefix='!', intents=self.intents)
-        self.discord_token = os.getenv('TOKEN')
+        self.reminder_name = reminder_name
         self.message = message
-
-    def remind(self):
-        # discord_bot_main(self.message)
-        pass
-
-
-class CalendarAvenue(Avenue):
-    def __init__(self, url) -> None:
-        super().__init__(url)
+        self.endpoint = endpoint
     
-    def remind(self, text):
-        pass
+    def remind(self):
+        url_to_request = self.url + self.endpoint
+        request_body = {
+            'subject': self.reminder_name,
+            'message': self.message
+        }
+        request_json = json.dumps(request_body)
+        reminder_request = requests.post(url_to_request, request_json)
+        print(reminder_request.json())
+
 
 class Reminder:
     def __init__(self, reminder_name: str, target_time: datetime, fuzziness, avenues=[], frequency='Once') -> None:
@@ -79,5 +66,5 @@ class Reminder:
     
 
 if __name__ == '__main__':
-    discord_test = DiscordAvenue('bunk', 21,'hello boiiii')
+    discord_test = Avenue(server_url, 'reminder name', 'message', '/discord')
     discord_test.remind()

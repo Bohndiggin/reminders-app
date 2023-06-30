@@ -38,7 +38,7 @@ async def gmail_run(request: Request):
 async def start_bot(request: Request):
     request_data = await request.json()
     await message_ready(request_data['message'])
-    return request_data
+    return {"message": "success"}
 
 async def message_ready(reminder_message):
     @bot.event
