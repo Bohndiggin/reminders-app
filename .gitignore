@@ -1,2 +1,7 @@
 ignore
 __pycache__
+.env
+test.py
+server/secrets.json
+server/secret_maker.py
+server/ignore

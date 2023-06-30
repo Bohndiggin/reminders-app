@@ -1,6 +1,19 @@
+import discord
+from discord.ext import commands
+import os
+from dotenv import load_dotenv
 import random
 from datetime import date, time, datetime, timedelta
 from faker import Faker
+import asyncio
+import time
+# from discord_bot import *
+import requests
+
+
+load_dotenv()
+
+
 fake = Faker()
 
 class Avenue: # Avenues are ways to remind the user.
@@ -15,11 +28,18 @@ class GmailAvenue(Avenue):
         pass
 
 class DiscordAvenue(Avenue):
-    def __init__(self, url) -> None:
+    def __init__(self, url, user_id, message) -> None:
         super().__init__(url)
+        self.intents = discord.Intents.all()
+        self.user_id = user_id
+        self.discord_bot = commands.Bot(command_prefix='!', intents=self.intents)
+        self.discord_token = os.getenv('TOKEN')
+        self.message = message
 
-    def remind(self, text):
+    def remind(self):
+        # discord_bot_main(self.message)
         pass
+
 
 class CalendarAvenue(Avenue):
     def __init__(self, url) -> None:
@@ -56,3 +76,8 @@ class Reminder:
 
     def __repr__(self) -> str:
         return f'{self.reminder_name}, a task you need to do {self.frequency}'
+    
+
+if __name__ == '__main__':
+    discord_test = DiscordAvenue('bunk', 21,'hello boiiii')
+    discord_test.remind()
