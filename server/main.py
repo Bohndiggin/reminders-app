@@ -5,24 +5,20 @@ import os, json
 from dotenv import load_dotenv
 import datetime, time
 from fastapi import FastAPI, Request
-# from pydantic import BaseModel
+import psycopg2
+
 load_dotenv()
 
 app = FastAPI()
 intents = discord.Intents.all()
-
+db_url = os.getenv("DB_API")
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# def main():
-#     pass
-
-# if __name__ == '__main__':
-#     main()
-
-# class ReminderMessage(BaseModel):
-#     message: str
-
-# message = ReminderMessage('')
+try:
+    conn = psycopg2.connect(db_url)
+    cur = conn.cursor()
+except Exception as e:
+     print(e)
 
 @app.get('/')
 async def root():
@@ -58,3 +54,14 @@ async def message_ready(reminder_message):
 @app.on_event("shutdown")
 async def shutdown_event():
     await bot.close()
+
+# Need to rewrite the server to only add reminders and times to a database and then it'll tick forward and send reminders as needed.
+
+@app.post('/add_reminder')
+async def insert_reminder(request: Request):
+    request_data = await request.json()
+    cur.execute("""
+        INSERT INTO Reminders(name, email, frequency, date_made, target_time)
+        VALUES
+                ('{reminder_name}', '{}')
+    """.format(**request_data))

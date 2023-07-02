@@ -1,15 +1,8 @@
-import discord
+import discord, schedule, asyncio, time, requests, os, json
 from discord.ext import commands
-import os
 from dotenv import load_dotenv
-import random
 from datetime import date, time, datetime, timedelta
 from faker import Faker
-import asyncio
-import time
-# from discord_bot import *
-import requests
-import json
 
 
 load_dotenv()
@@ -34,7 +27,7 @@ class Avenue: # Avenues are ways to remind the user.
         reminder_request = requests.post(url_to_request, request_json)
         print(reminder_request.json())
 
-
+# FREQUENCY NEEDS TO BE A LIST OF DAYS OF THE WEEK
 class Reminder:
     def __init__(self, reminder_name: str, target_time: datetime, fuzziness, avenues=[], frequency='Once') -> None:
         self.reminder_name = reminder_name
@@ -43,9 +36,13 @@ class Reminder:
         self.avenues = avenues
         self.frequency = frequency
         self.complete_status = False
+        self.set_offset()
     
     def remind(self):
-        pass
+        while datetime.now() < self.real_offset:
+            time.sleep(60)
+        for i in self.avenues:
+            i.remind()
 
     def complete(self):
         self.complete_status = True
@@ -53,8 +50,11 @@ class Reminder:
     def reset_complete(self):
         self.complete_status = False
 
-    def date_rollover(self):
-        self.reset_complete()
+    # def date_rollover(self):
+    #     self.reset_complete()
+
+    def set_recurrance(self):
+        pass
 
     def set_offset(self):
         fore_fuzzy = self.target_time - self.fuzziness
@@ -64,7 +64,18 @@ class Reminder:
     def __repr__(self) -> str:
         return f'{self.reminder_name}, a task you need to do {self.frequency}'
     
+    def add_avenue(self, url, endpoint):
+        self.avenues.append(Avenue(url, self.reminder_name, str(self), endpoint))
+    
 
 if __name__ == '__main__':
-    discord_test = Avenue(server_url, 'reminder name', 'message', '/discord')
-    discord_test.remind()
+    # discord_test = Avenue(server_url, 'reminder name', 'message', '/discord')
+    # discord_test.remind()
+    print(datetime.now())
+    reminder_test = Reminder('Do the Dishes', datetime.now() + timedelta(minutes=5), 1)
+    print(reminder_test.real_offset)
+    reminder_test.add_avenue(server_url, '/gmail')
+    reminder_test.add_avenue(server_url, '/discord')
+    reminder_test.remind()
+    print(reminder_test.real_offset)
+    print(datetime.now())
