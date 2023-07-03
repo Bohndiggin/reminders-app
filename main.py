@@ -10,7 +10,7 @@ from datetime import date, time, datetime
 
 from PyQt6 import QtCore
 
-from utils import *
+from server.utils import *
 
 from PyQt6.QtWidgets import (
     QApplication, QFileDialog, QMainWindow, QDialog, QWidget
