@@ -2,8 +2,6 @@
 import requests, schedule, sys # LOOK UP SCHEDULE DOCUMENATION FOR "TODAY"
 from dotenv import load_dotenv
 from utils import *
-from db_seed import seed_funciton
-from db_add_10_test import add_function
 import psycopg2, psycopg2.extras
 
 load_dotenv()
@@ -51,7 +49,8 @@ def remind_query(now=datetime.datetime.now() - datetime.timedelta(minutes=2)):
             next_90.append(temp_reminder)
     cur.close()
     conn.close()
-    print('AVENUES ON [1]', next_90[1].avenues)
+    if len(next_90) == 0:
+        print('remind_query returned no reminders')
     return next_90
 
 def remind_it():
@@ -92,8 +91,8 @@ def test():
     pass
 
 if __name__ == '__main__':
-    seed_funciton()
-    add_function()
+    # seed_funciton()
+    # add_function()
     remind_query()
     remind_it()
     # test()

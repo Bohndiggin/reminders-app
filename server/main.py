@@ -14,11 +14,6 @@ intents = discord.Intents.all()
 db_url = os.getenv("DB_API")
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-try:
-    conn = psycopg2.connect(db_url)
-    cur = conn.cursor()
-except Exception as e:
-     print(e)
 
 @app.get('/')
 async def root():
@@ -60,8 +55,17 @@ async def shutdown_event():
 @app.post('/add_reminder')
 async def insert_reminder(request: Request):
     request_data = await request.json()
+    try:
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor()
+    except Exception as e:
+        print(e)
     cur.execute("""
-        INSERT INTO Reminders(name, email, frequency, date_made, target_time)
+        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, fuzziness)
         VALUES
-                ('{reminder_name}', '{}')
+                ('{reminder_name}', '{email}', '{frequency}', '{date_made}', '{target_time}', '{fuzziness}'
+                );
     """.format(**request_data))
+    conn.commit()
+    cur.close()
+    conn.close()
