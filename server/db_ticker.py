@@ -1,51 +1,100 @@
 # THIS FILE IS TO TRACK TIME AND REGULARLY CHECK DB
-import datetime, time, os, requests, schedule, sys # LOOK UP SCHEDULE DOCUMENATION FOR "TODAY"
-import psycopg2, psycopg2.extras
+import requests, schedule, sys # LOOK UP SCHEDULE DOCUMENATION FOR "TODAY"
 from dotenv import load_dotenv
 from utils import *
+from db_seed import seed_funciton
+from db_add_10_test import add_function
+import psycopg2, psycopg2.extras
 
 load_dotenv()
 
 db_url = os.getenv("DB_API")
+server_url = os.getenv('SERVER_URL')
 
 
 next_90 = []
+successfully_reminded = []
 
 # Every hour, gather the next 90 minutes worth of reminders and sort them
 # AT midnight, change the day of the week
 # "EVERY OTHER TUESDAY, WEDNESDAY at 10pm"
+# ADD time as a parameter so I can run queries immediately
 
-def remind_query():
-    global next_90
+def remind_query(now=datetime.datetime.now() - datetime.timedelta(minutes=2)):
+    global next_90, successfully_reminded
     try:
         conn = psycopg2.connect(db_url)
         print('Connected to Database...')
     except Exception as e:
         print('Database Connection FAIL:', e)
-    next_90 = []
-    now = datetime.datetime.now()
+    str_now = now.strftime('%H:%M:%S')
     now_90 = now + datetime.timedelta(minutes=90)
+    str_now_90 = now_90.strftime('%H:%M:%S')
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(f"""
                 SELECT * FROM "public"."reminders" reminders
                 WHERE reminders.frequency LIKE '%{now.weekday()}%'
+                AND target_time BETWEEN '{str_now}' and '{str_now_90}'
                 """)
     answer = cur.fetchall()
-    answer_list = []
+    try:
+        id_list = [x.id for x in next_90]
+    except:
+        id_list = []
     for row in answer:
-        answer_list.append(dict(row))
-    print(answer_list[0])
+        temp_reminder = None      
+        temp_reminder = Reminder(**dict(row))
+        temp_reminder.add_avenue(server_url, '/gmail')
+        if temp_reminder.id in id_list:
+            continue
+        elif temp_reminder.id not in successfully_reminded:
+            next_90.append(temp_reminder)
     cur.close()
     conn.close()
+    print('AVENUES ON [1]', next_90[1].avenues)
+    return next_90
+
+def remind_it():
+    global next_90, successfully_reminded
+    try:
+        to_be_popped = []
+        for i in next_90:
+            print(i)
+            if i.id in successfully_reminded:
+                print('skipped: already reminded')
+                continue
+            else:
+                reminder_worked = i.remind()
+                if reminder_worked == True:
+                    successfully_reminded.append(i.id)
+                    to_be_popped.append(i.id)
+                    print('reminded!')
+                elif reminder_worked == False:
+                    print('skipped: incorrect time')
+                    continue
+        # for i in to_be_popped:
+        next_90 = [x for x in next_90 if x.id not in successfully_reminded]
+    except Exception as e:
+        print(e)
 
 schedule.every().hour.do(remind_query) # DAILY MEANS YOU MIGHT NOT NEED A DAY SPECIFIED
+# schedule.every().minute.do(remind_it)
 
-def main():
+def main(): # MAKE IT SET TO BUSY WHEN IT'S BUSY _ Make 2 QUEUES IN-flight and staged
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(60)
+        remind_it()
+
+def test():
+    test_time = datetime.datetime(2023, 7, 5, 5, 29, 0)
+    remind_query(now=test_time)
+    pass
 
 if __name__ == '__main__':
+    seed_funciton()
+    add_function()
     remind_query()
-    # main()
-
+    remind_it()
+    # test()
+    main()

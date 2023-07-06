@@ -1,8 +1,8 @@
 import sys
-import csv
+# import csv
 import json
-import typing
-import smtplib
+# import typing
+# import smtplib
 from dotenv import load_dotenv
 import os
 from datetime import date, time, datetime
