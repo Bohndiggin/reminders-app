@@ -52,7 +52,7 @@ async def shutdown_event():
 
 # Need to rewrite the server to only add reminders and times to a database and then it'll tick forward and send reminders as needed.
 
-@app.post('/add_reminder')
+@app.post('/reminder')
 async def insert_reminder(request: Request):
     request_data = await request.json()
     try:
@@ -63,9 +63,33 @@ async def insert_reminder(request: Request):
     cur.execute("""
         INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, fuzziness)
         VALUES
-                ('{reminder_name}', '{email}', '{frequency}', '{date_made}', '{target_time}', '{fuzziness}'
+                (
+                    '{reminder_name}', '{email}', '{frequency}', (current_date), '{target_time}', '{fuzziness}'
                 );
     """.format(**request_data))
     conn.commit()
     cur.close()
     conn.close()
+    return {"message": "reminder post sucsessful"}
+
+@app.delete('/reminder')
+async def delete_reminder(request: Request):
+    request_data = await request.json()
+    try:
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor()
+    except Exception as e:
+        print(e)
+    try:
+        cur.execute("""
+            DELETE FROM Reminders WHERE id = {id};
+        """.format(**request_data))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"message": "Deletion Sucessful of {id}".format(**request_data)}
+    except Exception as e:
+        print('Deletion Error', e)
+        cur.close()
+        conn.close()
+        return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(**request_data), "error": e}

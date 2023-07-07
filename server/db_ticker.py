@@ -18,14 +18,16 @@ successfully_reminded = []
 # "EVERY OTHER TUESDAY, WEDNESDAY at 10pm"
 # ADD time as a parameter so I can run queries immediately
 
-def remind_query(now=datetime.datetime.now() - datetime.timedelta(minutes=2)):
+def remind_query():
     global next_90, successfully_reminded
     try:
         conn = psycopg2.connect(db_url)
         print('Connected to Database...')
     except Exception as e:
         print('Database Connection FAIL:', e)
+    now = datetime.datetime.now() - datetime.timedelta(minutes=2)
     str_now = now.strftime('%H:%M:%S')
+    print(str_now)
     now_90 = now + datetime.timedelta(minutes=90)
     str_now_90 = now_90.strftime('%H:%M:%S')
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -42,7 +44,7 @@ def remind_query(now=datetime.datetime.now() - datetime.timedelta(minutes=2)):
     for row in answer:
         temp_reminder = None      
         temp_reminder = Reminder(**dict(row))
-        temp_reminder.add_avenue(server_url, '/gmail')
+        temp_reminder.add_avenue(server_url, '/gmail') # Need to add avenues to DB so I know which ones to add
         if temp_reminder.id in id_list:
             continue
         elif temp_reminder.id not in successfully_reminded:
@@ -58,7 +60,7 @@ def remind_it():
     try:
         to_be_popped = []
         for i in next_90:
-            print(i)
+            # print(i)
             if i.id in successfully_reminded:
                 print('skipped: already reminded')
                 continue
@@ -71,13 +73,12 @@ def remind_it():
                 elif reminder_worked == False:
                     print('skipped: incorrect time')
                     continue
-        # for i in to_be_popped:
         next_90 = [x for x in next_90 if x.id not in successfully_reminded]
+        print('______________')
     except Exception as e:
         print(e)
 
-schedule.every().hour.do(remind_query) # DAILY MEANS YOU MIGHT NOT NEED A DAY SPECIFIED
-# schedule.every().minute.do(remind_it)
+schedule.every().hour.do(remind_query)
 
 def main(): # MAKE IT SET TO BUSY WHEN IT'S BUSY _ Make 2 QUEUES IN-flight and staged
     while True:

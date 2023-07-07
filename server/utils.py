@@ -47,7 +47,8 @@ class Reminder:
         self.set_offset()
         # print(self.real_offset)
     
-    def remind(self, now=datetime.datetime.now()): # 
+    def remind(self): # 
+        now = datetime.datetime.now()
         now_no_s_ms = now.replace(second=0, microsecond=0)
         if now_no_s_ms == self.real_offset:
             # print('same')
