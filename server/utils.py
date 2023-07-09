@@ -24,6 +24,7 @@ class Avenue: # Avenues are ways to remind the user.
             'subject': self.parent_reminder_name,
             'message': self.message,
             'email': self.email
+            # 'target_user': 
         }
         request_json = json.dumps(request_body)
         reminder_request = requests.post(url_to_request, request_json)

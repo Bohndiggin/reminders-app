@@ -29,21 +29,22 @@ async def gmail_run(request: Request):
 async def start_bot(request: Request):
     request_data = await request.json()
     await message_ready(request_data['message'])
-    # await shutdown_event()
+    await shutdown_event()
     return {"message": "success"}
 
 async def message_ready(reminder_message):
     @bot.event
     async def on_ready():
-        with open('secrets.json', 'r') as f:
-            secret_list = json.load(f)
+        # with open('secrets.json', 'r') as f:
+        #     secret_list = json.load(f)
         print(f'{bot.user} has connected to Discord!')
-        for i in secret_list["discord_IDs"]:
-            user = await bot.fetch_user(i)
-            time.sleep(1)
-            await user.send(reminder_message)
-            print('sent to ' + str(i))
-        await bot.close()
+        # for i in secret_list["discord_IDs"]:
+        target_user = os.getenv('TARGET_USER')
+        user = await bot.fetch_user(target_user)
+        time.sleep(1)
+        await user.send(reminder_message)
+        print('sent to ' , str(target_user))
+        # await bot.close()
 
     await bot.start(os.getenv('DISCORD_TOKEN'))
     return {"message": "success"}
