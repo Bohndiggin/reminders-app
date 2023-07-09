@@ -33,21 +33,30 @@ async def start_bot(request: Request):
     return {"message": "success"}
 
 async def message_ready(reminder_message):
-    @bot.event
-    async def on_ready():
-        # with open('secrets.json', 'r') as f:
-        #     secret_list = json.load(f)
-        print(f'{bot.user} has connected to Discord!')
-        # for i in secret_list["discord_IDs"]:
-        target_user = os.getenv('TARGET_USER')
-        user = await bot.fetch_user(target_user)
-        time.sleep(1)
-        await user.send(reminder_message)
-        print('sent to ' , str(target_user))
-        return {"message": "success"}
-        # await bot.close()
+    # @bot.event
+    # async def on_ready():
+    #     # with open('secrets.json', 'r') as f:
+    #     #     secret_list = json.load(f)
+    #     print(f'{bot.user} has connected to Discord!')
+    #     # for i in secret_list["discord_IDs"]:
+    #     target_user = os.getenv('TARGET_USER')
+    #     user = await bot.fetch_user(target_user)
+    #     time.sleep(1)
+    #     await user.send(reminder_message)
+    #     print('sent to ' , str(target_user))
+    #     return {"message": "success"}
+    #     # await bot.close()
 
     await bot.start(os.getenv('DISCORD_TOKEN'))
+    print(f'{bot.user} has connected to Discord!')
+    # for i in secret_list["discord_IDs"]:
+    target_user = os.getenv('TARGET_USER')
+    user = await bot.fetch_user(target_user)
+    time.sleep(1)
+    await user.send(reminder_message)
+    print('sent to ' , str(target_user))
+    # return {"message": "success"}
+    # await bot.close()
     return {"message": "success"}
 
 @app.on_event("shutdown")
