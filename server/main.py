@@ -44,6 +44,11 @@ async def message_ready(reminder_message):
     await bot.close()
     return {"message": "success"}
 
+@app.on_event("startup")
+async def startup_event():
+    # Replace TOKEN with your bot's token
+    await bot.start(os.getenv('DISCORD_TOKEN'))
+
 @app.on_event("shutdown")
 async def shutdown_event():
     await bot.close()
@@ -92,4 +97,4 @@ async def delete_reminder(request: Request):
         conn.close()
         return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(**request_data), "error": e}
     
-bot.run(os.getenv('DISCORD_TOKEN'))
+# bot.run(os.getenv('DISCORD_TOKEN'))
