@@ -5,7 +5,7 @@ import os, json
 from dotenv import load_dotenv
 import datetime, time
 from fastapi import FastAPI, Request
-import psycopg2
+import psycopg2, threading
 
 load_dotenv()
 
@@ -44,10 +44,14 @@ async def message_ready(reminder_message):
     await bot.close()
     return {"message": "success"}
 
+def run_bot():
+    # Replace TOKEN with your bot's token
+    bot.run(os.getenv('DISCORD_TOKEN'))
+
 @app.on_event("startup")
 async def startup_event():
-    # Replace TOKEN with your bot's token
-    await bot.start(os.getenv('DISCORD_TOKEN'))
+    thread = threading.Thread(target=run_bot)
+    thread.start()
 
 @app.on_event("shutdown")
 async def shutdown_event():
