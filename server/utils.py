@@ -22,7 +22,8 @@ class Avenue: # Avenues are ways to remind the user.
         url_to_request = self.url + self.endpoint
         request_body = {
             'subject': self.parent_reminder_name,
-            'message': self.message
+            'message': self.message,
+            'email': self.email
         }
         request_json = json.dumps(request_body)
         reminder_request = requests.post(url_to_request, request_json)
@@ -33,7 +34,7 @@ class Avenue: # Avenues are ways to remind the user.
 
 # FREQUENCY NEEDS TO BE A LIST OF DAYS OF THE WEEK
 class Reminder:
-    def __init__(self, id, reminder_name: str, target_time:datetime.time, fuzziness=1, frequency='Once', email='', date_made=datetime.time) -> None:
+    def __init__(self, id, reminder_name: str, target_time:datetime.time, fuzziness=1, frequency='Once', email='', date_made=datetime.time, avenues_sql='') -> None:
         self.id = id
         self.reminder_name = reminder_name
         today = datetime.date.today()
@@ -44,6 +45,7 @@ class Reminder:
         self.complete_status = False
         self.email = email
         self.date_made = date_made
+        self.avenues_sql = avenues_sql
         self.set_offset()
         # print(self.real_offset)
     
@@ -54,7 +56,7 @@ class Reminder:
             # print('same')
             for i in self.avenues:
                 i.remind()
-                return True
+            return True
         else:
             return False
 

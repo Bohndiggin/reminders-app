@@ -44,7 +44,9 @@ def remind_query():
     for row in answer:
         temp_reminder = None      
         temp_reminder = Reminder(**dict(row))
-        temp_reminder.add_avenue(server_url, '/gmail') # Need to add avenues to DB so I know which ones to add
+        temp_avenue_list = temp_reminder.avenues_sql.split(' ')
+        for avenue in temp_avenue_list:
+            temp_reminder.add_avenue(server_url, avenue) # Need to add avenues to DB so I know which ones to add
         if temp_reminder.id in id_list:
             continue
         elif temp_reminder.id not in successfully_reminded:
@@ -71,7 +73,7 @@ def remind_it():
                     to_be_popped.append(i.id)
                     print('reminded!')
                 elif reminder_worked == False:
-                    print('skipped: incorrect time')
+                    # print('skipped: incorrect time')
                     continue
         next_90 = [x for x in next_90 if x.id not in successfully_reminded]
         print('______________')
