@@ -82,6 +82,7 @@ class Reminder:
     def add_avenue(self=None, url='Server', endpoint='/endpoint'):
         new_avenue = Avenue(url, self.reminder_name, str(self), endpoint, self.email)
         self.avenues.append(new_avenue)
+        
     
 
 # if __name__ == '__main__':

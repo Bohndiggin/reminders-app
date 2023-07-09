@@ -46,13 +46,13 @@ async def insert_reminder(request: Request):
     except Exception as e:
         print(e)
     query = """
-        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, fuzziness)
+        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, fuzziness, avenues_sql)
         VALUES
                 (
-                    %s, %s, %s, (current_date), %s, %s
+                    %s, %s, %s, (current_date), %s, %s, %s
                 );
     """
-    values = [request_data['reminder_name'], request_data['email'], request_data['frequency'], request_data['target_time'], request_data['fuzziness']]
+    values = [request_data['reminder_name'], request_data['email'], request_data['frequency'], request_data['target_time'], request_data['fuzziness'], request_data['avenues_sql']]
     cur.execute(query, values)
     conn.commit()
     cur.close()
@@ -80,5 +80,6 @@ async def delete_reminder(request: Request):
         cur.close()
         conn.close()
         return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(**request_data), "error": e}
+    # WHEN RUN KILL DB_TICKER and run it again
     
 # bot.run(os.getenv('DISCORD_TOKEN'))
