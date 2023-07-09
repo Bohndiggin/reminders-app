@@ -44,7 +44,7 @@ async def message_ready(reminder_message):
         time.sleep(1)
         await user.send(reminder_message)
         print('sent to ' , str(target_user))
-        await bot.close()
+        bot.close()
 
     await bot.start(os.getenv('DISCORD_TOKEN'))
     return {"message": "success"}
