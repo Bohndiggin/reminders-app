@@ -4,7 +4,7 @@ from gmail_reminder_server import *
 import os, json
 from dotenv import load_dotenv
 import datetime, time
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, BackgroundTasks
 import psycopg2, threading
 
 load_dotenv()
@@ -30,28 +30,21 @@ async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
 @app.post("/discord")
-async def start_bot(request: Request):
+async def start_bot(request: Request, background_tasks: BackgroundTasks):
     request_data = await request.json()
-    await message_ready(request_data['message'])
+    background_tasks.add_task(message_ready, request_data['message'])
     return {"message": "success"}
 
 async def message_ready(reminder_message):
     target_user = os.getenv('TARGET_USER')
     user = await bot.fetch_user(target_user)
-    time.sleep(1)
     await user.send(reminder_message)
     print('sent to ' , str(target_user))
-    await bot.close()
-    return {"message": "success"}
-
-def run_bot():
-    # Replace TOKEN with your bot's token
-    bot.run(os.getenv('DISCORD_TOKEN'))
 
 @app.on_event("startup")
 async def startup_event():
-    thread = threading.Thread(target=run_bot)
-    thread.start()
+    # Replace TOKEN with your bot's token
+    bot.run(os.getenv('DISCORD_TOKEN'))
 
 @app.on_event("shutdown")
 async def shutdown_event():
