@@ -45,13 +45,15 @@ async def insert_reminder(request: Request):
         cur = conn.cursor()
     except Exception as e:
         print(e)
-    cur.execute("""
+    query = """
         INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, fuzziness)
         VALUES
                 (
-                    '{reminder_name}', '{email}', '{frequency}', (current_date), '{target_time}', '{fuzziness}'
+                    %s, %s, %s, (current_date), %s, %s
                 );
-    """.format(**request_data))
+    """
+    values = [request_data['reminder_name'], request_data['email'], request_data['frequency'], request_data['target_time'], request_data['fuzziness']]
+    cur.execute(query, values)
     conn.commit()
     cur.close()
     conn.close()
