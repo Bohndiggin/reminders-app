@@ -5,7 +5,7 @@ import os, json
 from dotenv import load_dotenv
 import datetime, time
 from fastapi import FastAPI, Request, BackgroundTasks
-import psycopg2, threading
+import psycopg2, threading, requests
 
 load_dotenv()
 
@@ -25,30 +25,15 @@ async def gmail_run(request: Request):
     gmail_bot_main(request_data['subject'], request_data['message'], request_data['email'])
     return {"message": "success"}
 
-@bot.event
-async def on_ready():
-    print(f'{bot.user} has connected to Discord!')
-
-@app.post("/discord")
-async def start_bot(request: Request, background_tasks: BackgroundTasks):
+@app.post('/discord')
+async def discord_run(request: Request):
     request_data = await request.json()
-    background_tasks.add_task(message_ready, request_data['message'])
-    return {"message": "success"}
-
-async def message_ready(reminder_message):
-    target_user = os.getenv('TARGET_USER')
-    user = await bot.fetch_user(target_user)
-    await user.send(reminder_message)
-    print('sent to ' , str(target_user))
-
-@app.on_event("startup")
-async def startup_event():
-    # Replace TOKEN with your bot's token
-    await bot.run(os.getenv('DISCORD_TOKEN'))
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await bot.close()
+    try:
+        response = requests.post(url='PLACEHOLDER', json=request_data)
+        print(response.status_code)
+        print(response.json())
+    except Exception as e:
+        print(e)
 
 # Need to rewrite the server to only add reminders and times to a database and then it'll tick forward and send reminders as needed.
 
