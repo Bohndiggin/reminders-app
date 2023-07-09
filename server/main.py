@@ -29,7 +29,7 @@ async def gmail_run(request: Request):
 async def start_bot(request: Request):
     request_data = await request.json()
     await message_ready(request_data['message'])
-    await shutdown_event()
+    # await shutdown_event()
     return {"message": "success"}
 
 async def message_ready(reminder_message):
@@ -44,7 +44,7 @@ async def message_ready(reminder_message):
         time.sleep(1)
         await user.send(reminder_message)
         print('sent to ' , str(target_user))
-        bot.close()
+        await bot.close()
 
     await bot.start(os.getenv('DISCORD_TOKEN'))
     return {"message": "success"}
