@@ -44,7 +44,7 @@ async def message_ready(reminder_message):
 @app.on_event("startup")
 async def startup_event():
     # Replace TOKEN with your bot's token
-    bot.run(os.getenv('DISCORD_TOKEN'))
+    await bot.run(os.getenv('DISCORD_TOKEN'))
 
 @app.on_event("shutdown")
 async def shutdown_event():
