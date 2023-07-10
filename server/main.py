@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import datetime, time
 from fastapi import FastAPI, Request, BackgroundTasks
 import psycopg2, threading, requests, pytz
+import subprocess as sp
 
 load_dotenv()
 
@@ -13,6 +14,7 @@ app = FastAPI()
 intents = discord.Intents.all()
 db_url = os.getenv("DB_API")
 bot = commands.Bot(command_prefix='!', intents=intents)
+ticker = sp.Popen(['python', 'db_ticker.py'])
 
 
 @app.get('/')
@@ -39,13 +41,14 @@ async def discord_run(request: Request):
 
 @app.post('/reminder')
 async def insert_reminder(request: Request):
+    global ticker
     request_data = await request.json()
     try:
         conn = psycopg2.connect(db_url)
         cur = conn.cursor()
     except Exception as e:
         print(e)
-    time_zone = pytz.timezone('US/Mountian')
+    time_zone = pytz.timezone('US/Mountain')
     target_time = datetime.datetime.strptime(request_data['target_time'], '%H:%M:%S')
     localized_time = time_zone.localize(target_time)
     localized_time_str = localized_time.strftime('%H:%M:%S')
@@ -61,6 +64,8 @@ async def insert_reminder(request: Request):
     conn.commit()
     cur.close()
     conn.close()
+    sp.Popen.terminate(ticker)
+    ticker = sp.Popen(['python', 'db_ticker.py'])
     return {"message": "reminder post sucsessful"}
 
 @app.delete('/reminder')

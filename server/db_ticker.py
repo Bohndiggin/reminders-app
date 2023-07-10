@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from utils import *
 import psycopg2, psycopg2.extras
 from multiprocessing import Process
+# import subprocess as sp
 
 load_dotenv()
 
