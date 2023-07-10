@@ -1,4 +1,4 @@
-import discord, schedule, asyncio, time, requests, os, json
+import discord, schedule, asyncio, time, requests, os, json, pytz
 from discord.ext import commands
 from dotenv import load_dotenv
 import datetime
@@ -35,11 +35,12 @@ class Avenue: # Avenues are ways to remind the user.
 
 # FREQUENCY NEEDS TO BE A LIST OF DAYS OF THE WEEK
 class Reminder:
-    def __init__(self, id, reminder_name: str, target_time:datetime.time, fuzziness=1, frequency='Once', email='', date_made=datetime.time, avenues_sql='') -> None:
+    def __init__(self, id, reminder_name: str, target_time:datetime.time, target_time_timezone:str, fuzziness=1, frequency='Once', email='', date_made=datetime.time, avenues_sql='') -> None:
         self.id = id
         self.reminder_name = reminder_name
         today = datetime.date.today()
         self.target_time = datetime.datetime.combine(today, target_time)
+        self.target_time_timezone = target_time_timezone
         self.fuzziness = datetime.timedelta(minutes=fuzziness)
         self.avenues = []
         self.frequency = frequency

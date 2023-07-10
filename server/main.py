@@ -5,7 +5,7 @@ import os, json
 from dotenv import load_dotenv
 import datetime, time
 from fastapi import FastAPI, Request, BackgroundTasks
-import psycopg2, threading, requests
+import psycopg2, threading, requests, pytz
 
 load_dotenv()
 
@@ -45,14 +45,18 @@ async def insert_reminder(request: Request):
         cur = conn.cursor()
     except Exception as e:
         print(e)
+    time_zone = pytz.timezone('US/Mountian')
+    target_time = datetime.datetime.strptime(request_data['target_time'], '%H:%M:%S')
+    localized_time = time_zone.localize(target_time)
+    localized_time_str = localized_time.strftime('%H:%M:%S')
     query = """
-        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, fuzziness, avenues_sql)
+        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, target_time_timezone, fuzziness, avenues_sql)
         VALUES
                 (
-                    %s, %s, %s, (current_date), %s, %s, %s
+                    %s, %s, %s, (current_date), %s, %s, %s, %s
                 );
     """
-    values = [request_data['reminder_name'], request_data['email'], request_data['frequency'], request_data['target_time'], request_data['fuzziness'], request_data['avenues_sql']]
+    values = [request_data['reminder_name'], request_data['email'], request_data['frequency'], localized_time_str, request_data['target_time_timezone'], request_data['fuzziness'], request_data['avenues_sql']]
     cur.execute(query, values)
     conn.commit()
     cur.close()
