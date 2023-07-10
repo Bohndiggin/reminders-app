@@ -1,11 +1,9 @@
 from discord.ext import commands
-import discord
+import discord, os, datetime
 from gmail_reminder_server import *
-import os, json
 from dotenv import load_dotenv
-import datetime, time
-from fastapi import FastAPI, Request, BackgroundTasks
-import psycopg2, threading, requests, pytz
+from fastapi import FastAPI, Request
+import psycopg2, requests, pytz
 import subprocess as sp
 
 load_dotenv()
@@ -16,6 +14,10 @@ db_url = os.getenv("DB_API")
 bot = commands.Bot(command_prefix='!', intents=intents)
 ticker = sp.Popen(['python', 'db_ticker.py'])
 
+def restart_ticker():
+    global ticker
+    sp.Popen.terminate(ticker)
+    ticker = sp.Popen(['python', 'db_ticker.py'])
 
 @app.get('/')
 async def root():
@@ -41,7 +43,7 @@ async def discord_run(request: Request):
 
 @app.post('/reminder')
 async def insert_reminder(request: Request):
-    global ticker
+    
     request_data = await request.json()
     try:
         conn = psycopg2.connect(db_url)
@@ -66,8 +68,7 @@ async def insert_reminder(request: Request):
     conn.commit()
     cur.close()
     conn.close()
-    sp.Popen.terminate(ticker)
-    ticker = sp.Popen(['python', 'db_ticker.py'])
+    restart_ticker()
     return {"message": "reminder post sucsessful"}
 
 @app.delete('/reminder')
@@ -85,12 +86,11 @@ async def delete_reminder(request: Request):
         conn.commit()
         cur.close()
         conn.close()
+        restart_ticker()
         return {"message": "Deletion Sucessful of {id}".format(**request_data)}
     except Exception as e:
         print('Deletion Error', e)
         cur.close()
         conn.close()
+        restart_ticker()
         return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(**request_data), "error": e}
-    # WHEN RUN KILL DB_TICKER and run it again
-    
-# bot.run(os.getenv('DISCORD_TOKEN'))
