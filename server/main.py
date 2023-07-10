@@ -48,9 +48,11 @@ async def insert_reminder(request: Request):
         cur = conn.cursor()
     except Exception as e:
         print(e)
-    time_zone = pytz.timezone('US/Mountain')
+    time_zone = pytz.timezone(request['target_time_timezone'])
+    target_time_zone = pytz.timezone('US/Mountain')
     target_time = datetime.datetime.strptime(request_data['target_time'], '%H:%M:%S')
-    localized_time = time_zone.localize(target_time)
+    target_time_non_local = time_zone.localize(target_time)
+    localized_time = target_time_non_local.astimezone(target_time_zone)
     localized_time_str = localized_time.strftime('%H:%M:%S')
     query = """
         INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, target_time_timezone, fuzziness, avenues_sql)
