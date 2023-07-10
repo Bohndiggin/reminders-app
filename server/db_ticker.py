@@ -81,12 +81,13 @@ def remind_it():
         print(e)
 
 schedule.every().hour.do(remind_query)
+schedule.every().minute.do(remind_it)
 
 def main(): # MAKE IT SET TO BUSY WHEN IT'S BUSY _ Make 2 QUEUES IN-flight and staged
     while True:
         schedule.run_pending()
-        time.sleep(60)
-        remind_it()
+        time.sleep(1)
+        # remind_it()
 
 def test():
     test_time = datetime.datetime(2023, 7, 5, 5, 29, 0)
