@@ -18,6 +18,15 @@ successfully_reminded = []
 # AT midnight, change the day of the week
 # "EVERY OTHER TUESDAY, WEDNESDAY at 10pm"
 # ADD time as a parameter so I can run queries immediately
+def reminder_func_paralell(obj, successfully_reminded):
+    reminder_worked = obj.remind()
+    if reminder_worked == True:
+        successfully_reminded.append(obj.id)
+        print('reminded!')
+    elif reminder_worked == False:
+        # print('skipped: incorrect time')
+        pass
+    return 'complete'
 
 def remind_query():
     global next_90, successfully_reminded
@@ -60,14 +69,6 @@ def remind_query():
 
 def remind_it():
     global next_90, successfully_reminded
-    def reminder_func_paralell(obj, successfully_reminded):
-        reminder_worked = obj.remind()
-        if reminder_worked == True:
-            successfully_reminded.append(obj.id)
-            print('reminded!')
-        elif reminder_worked == False:
-            # print('skipped: incorrect time')
-            pass
     try:
         for i in next_90:
             # print(i)
@@ -76,7 +77,7 @@ def remind_it():
                 continue
             else:
                 process_list = []
-                process_list.append(Process(target=reminder_func_paralell(i, successfully_reminded)))
+                process_list.append(Process(target=reminder_func_paralell, kwargs={"obj": i, "successfully_reminded": successfully_reminded}))
                 for j in process_list:
                     j.start()
         next_90 = [x for x in next_90 if x.id not in successfully_reminded]
