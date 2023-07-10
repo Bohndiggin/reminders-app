@@ -76,7 +76,7 @@ def remind_it():
                     # print('skipped: incorrect time')
                     continue
         next_90 = [x for x in next_90 if x.id not in successfully_reminded]
-        print('______________')
+        print('______________', datetime.datetime.now())
     except Exception as e:
         print(e)
 
