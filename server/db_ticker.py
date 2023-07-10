@@ -3,6 +3,7 @@ import requests, schedule, sys # LOOK UP SCHEDULE DOCUMENATION FOR "TODAY"
 from dotenv import load_dotenv
 from utils import *
 import psycopg2, psycopg2.extras
+from multiprocessing import Process
 
 load_dotenv()
 
@@ -59,22 +60,25 @@ def remind_query():
 
 def remind_it():
     global next_90, successfully_reminded
+    def reminder_func_paralell(obj, successfully_reminded):
+        reminder_worked = obj.remind()
+        if reminder_worked == True:
+            successfully_reminded.append(obj.id)
+            print('reminded!')
+        elif reminder_worked == False:
+            # print('skipped: incorrect time')
+            pass
     try:
-        to_be_popped = []
         for i in next_90:
             # print(i)
             if i.id in successfully_reminded:
                 print('skipped: already reminded')
                 continue
             else:
-                reminder_worked = i.remind()
-                if reminder_worked == True:
-                    successfully_reminded.append(i.id)
-                    to_be_popped.append(i.id)
-                    print('reminded!')
-                elif reminder_worked == False:
-                    # print('skipped: incorrect time')
-                    continue
+                process_list = []
+                process_list.append(Process(target=reminder_func_paralell(i, successfully_reminded)))
+                for j in process_list:
+                    j.start()
         next_90 = [x for x in next_90 if x.id not in successfully_reminded]
         print('______________', datetime.datetime.now())
     except Exception as e:
