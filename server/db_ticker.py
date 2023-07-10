@@ -22,7 +22,7 @@ def reminder_func_paralell(obj, successfully_reminded):
     reminder_worked = obj.remind()
     if reminder_worked == True:
         successfully_reminded.append(obj.id)
-        print('reminded!', obj.real_offset)
+        print(f'reminded! ID: {obj.id} __ Offset: {obj.real_offset}')
     elif reminder_worked == False:
         # print('skipped: incorrect time')
         pass
