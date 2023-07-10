@@ -48,7 +48,7 @@ async def insert_reminder(request: Request):
         cur = conn.cursor()
     except Exception as e:
         print(e)
-    time_zone = pytz.timezone(request['target_time_timezone'])
+    time_zone = pytz.timezone(request_data['target_time_timezone'])
     target_time_zone = pytz.timezone('US/Mountain')
     target_time = datetime.datetime.strptime(request_data['target_time'], '%H:%M:%S')
     target_time_non_local = time_zone.localize(target_time)
