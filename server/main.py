@@ -50,6 +50,7 @@ async def insert_reminder(request: Request):
         cur = conn.cursor()
     except Exception as e:
         print(e)
+    # Next section is to sort out timezones. The server is in US/Mountain time. All reminders are changed to US/Mountain, but the original Timezone is stored just in case.
     time_zone = pytz.timezone(request_data['target_time_timezone'])
     target_time_zone = pytz.timezone('US/Mountain')
     target_time = datetime.datetime.strptime(request_data['target_time'], '%H:%M:%S')
