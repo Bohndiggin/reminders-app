@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 import psycopg2, requests, pytz
 import subprocess as sp
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -13,6 +14,25 @@ intents = discord.Intents.all()
 db_url = os.getenv("DB_API")
 bot = commands.Bot(command_prefix='!', intents=intents)
 ticker = sp.Popen(['python', 'db_ticker.py'])
+
+class ReminderItem(BaseModel):
+    reminder_name: str
+    email: str
+    frequency: str
+    target_time: str
+    target_time_timezone: str
+    fuzziness: int
+    avenues_sql: str
+
+class GmailItem(BaseModel):
+    subject: str
+    message: str
+    email: str
+
+class DiscordItem(BaseModel):
+    subject: str
+    message: str
+    discord_id: int
 
 def restart_ticker():
     global ticker
@@ -24,16 +44,14 @@ async def root():
     return {"message": "Hello World"}
 
 @app.post('/gmail')
-async def gmail_run(request: Request):
-    request_data = await request.json()
-    gmail_bot_main(request_data['subject'], request_data['message'], request_data['email'])
+async def gmail_run(gmail_request: GmailItem):
+    gmail_bot_main(gmail_request.subject, gmail_request.message, gmail_request.email)
     return {"message": "success"}
 
 @app.post('/discord')
-async def discord_run(request: Request):
-    request_data = await request.json()
+async def discord_run(discord_request: DiscordItem):
     try:
-        response = requests.post(url='PLACEHOLDER', json=request_data)
+        response = requests.post(url='PLACEHOLDER', json=discord_request)
         print(response.status_code)
         print(response.json())
     except Exception as e:
@@ -42,18 +60,16 @@ async def discord_run(request: Request):
 # Need to rewrite the server to only add reminders and times to a database and then it'll tick forward and send reminders as needed.
 
 @app.post('/reminder')
-async def insert_reminder(request: Request):
-    
-    request_data = await request.json()
+async def insert_reminder(reminder_request: ReminderItem):
     try:
         conn = psycopg2.connect(db_url)
         cur = conn.cursor()
     except Exception as e:
         print(e)
     # Next section is to sort out timezones. The server is in US/Mountain time. All reminders are changed to US/Mountain, but the original Timezone is stored just in case.
-    time_zone = pytz.timezone(request_data['target_time_timezone'])
+    time_zone = pytz.timezone(reminder_request.target_time_timezone)
     target_time_zone = pytz.timezone('US/Mountain')
-    target_time = datetime.datetime.strptime(request_data['target_time'], '%H:%M:%S')
+    target_time = datetime.datetime.strptime(reminder_request.target_time, '%H:%M:%S')
     target_time_non_local = time_zone.localize(target_time)
     localized_time = target_time_non_local.astimezone(target_time_zone)
     localized_time_str = localized_time.strftime('%H:%M:%S')
@@ -64,7 +80,15 @@ async def insert_reminder(request: Request):
                     %s, %s, %s, (current_date), %s, %s, %s, %s
                 );
     """
-    values = [request_data['reminder_name'], request_data['email'], request_data['frequency'], localized_time_str, request_data['target_time_timezone'], request_data['fuzziness'], request_data['avenues_sql']]
+    values = [
+        reminder_request.reminder_name,
+        reminder_request.email,
+        reminder_request.frequency,
+        localized_time_str,
+        reminder_request.target_time_timezone,
+        reminder_request.fuzziness,
+        reminder_request.avenues_sql
+    ]
     cur.execute(query, values)
     conn.commit()
     cur.close()
@@ -73,8 +97,7 @@ async def insert_reminder(request: Request):
     return {"message": "reminder post sucsessful"}
 
 @app.delete('/reminder')
-async def delete_reminder(request: Request):
-    request_data = await request.json()
+async def delete_reminder(reminder_request: ReminderItem):
     try:
         conn = psycopg2.connect(db_url)
         cur = conn.cursor()
@@ -83,15 +106,15 @@ async def delete_reminder(request: Request):
     try:
         cur.execute("""
             DELETE FROM Reminders WHERE id = {id};
-        """.format(**request_data))
+        """.format(**reminder_request))
         conn.commit()
         cur.close()
         conn.close()
         restart_ticker()
-        return {"message": "Deletion Sucessful of {id}".format(**request_data)}
+        return {"message": "Deletion Sucessful of {id}".format(**reminder_request)}
     except Exception as e:
         print('Deletion Error', e)
         cur.close()
         conn.close()
         restart_ticker()
-        return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(**request_data), "error": e}
+        return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(**reminder_request), "error": e}

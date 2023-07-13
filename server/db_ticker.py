@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from utils import *
 import psycopg2, psycopg2.extras
 from multiprocessing import Process
+from pydantic import BaseModel
 
 load_dotenv()
 
