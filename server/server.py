@@ -1,4 +1,5 @@
 from discord.ext import commands
+import asyncio
 import discord, os, datetime
 from gmail_reminder_server import *
 from dotenv import load_dotenv
@@ -6,6 +7,7 @@ from fastapi import FastAPI, Request
 import psycopg2, requests, pytz
 import subprocess as sp
 from pydantic import BaseModel
+from discord_bot import start_bot
 
 load_dotenv()
 
@@ -14,6 +16,7 @@ intents = discord.Intents.all()
 db_url = os.getenv("DB_API")
 bot = commands.Bot(command_prefix='!', intents=intents)
 ticker = sp.Popen(['python', 'db_ticker.py'])
+# bot.run(os.getenv('TOKEN'))
 
 class ReminderItem(BaseModel):
     reminder_name: str
@@ -38,6 +41,12 @@ def restart_ticker():
     global ticker
     sp.Popen.terminate(ticker)
     ticker = sp.Popen(['python', 'db_ticker.py'])
+   
+@app.on_event('startup')
+async def startup_event():
+    asyncio.create_task(bot.start(os.getenv('DISCORD_TOKEN')))
+    await asyncio.sleep(4)
+    print(f'{bot.user} has connected to discord!')
 
 @app.get('/')
 async def root():
@@ -48,14 +57,13 @@ async def gmail_run(gmail_request: GmailItem):
     gmail_bot_main(gmail_request.subject, gmail_request.message, gmail_request.email)
     return {"message": "success"}
 
-@app.post('/discord')
-async def discord_run(discord_request: DiscordItem):
-    try:
-        response = requests.post(url='PLACEHOLDER', json=discord_request)
-        print(response.status_code)
-        print(response.json())
-    except Exception as e:
-        print(e)
+@app.post("/discord")
+async def start_bot(discord_item: DiscordItem):
+    user = await bot.fetch_user(discord_item.discord_id)
+    await user.send(discord_item.message)
+    print('sent to ' , discord_item.discord_id)
+    # await bot.close()
+    return {"status": "success"}
 
 # Need to rewrite the server to only add reminders and times to a database and then it'll tick forward and send reminders as needed.
 

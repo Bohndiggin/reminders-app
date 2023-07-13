@@ -3,6 +3,7 @@ import discord, os
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 import uvicorn
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -10,18 +11,13 @@ intents = discord.Intents.all()
 app = FastAPI()
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-@bot.event
-async def on_ready():
-    print(f'{bot.user} has connected to Discord!')
-
-@app.post("/discord")
-async def start_bot(request: Request):
-    request_data = await request.json()
-    # background_tasks.add_task(message_ready, request_data['message'])
-    target_user = os.getenv('TARGET_USER')
-    user = await bot.fetch_user(target_user)
-    await user.send(request_data['message'])
-    print('sent to ' , target_user)
+# @app.post("/discord")
+async def start_bot(message, discord_id):
+    bot.run(os.getenv('TOKEN'))
+    user = await bot.fetch_user(discord_id)
+    await user.send(message)
+    print('sent to ' , discord_id)
+    await bot.close()
     return {"status": "success"}
 
 # @app.on_event("startup")
@@ -33,6 +29,6 @@ async def start_bot(request: Request):
 async def shutdown_event():
     await bot.close()
 
-if __name__ == "__main__":
-    bot.run(os.getenv('DISCORD_TOKEN'))
-    uvicorn.run(app, port=8000)
+# if __name__ == "__main__":
+#     # uvicorn.run(app, port=8000)
+#     bot.run(os.getenv('DISCORD_TOKEN'))
