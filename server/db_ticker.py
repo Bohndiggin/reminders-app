@@ -81,8 +81,20 @@ def remind_it(): # makes a list of reminder processes and starts them all.
     except Exception as e:
         print(e)
 
-schedule.every().hour.do(remind_query)
-schedule.every().minute.do(remind_it)
+def remind_query_try():
+    try:
+        remind_query()
+    except Exception as e:
+        print(e)
+
+def remind_it_try():
+    try:
+        remind_it()
+    except Exception as e:
+        print(e)
+
+schedule.every().hour.do(remind_query_try)
+schedule.every().minute.do(remind_it_try)
 
 def main(): 
     while True:
@@ -90,6 +102,6 @@ def main():
         time.sleep(1)
 
 if __name__ == '__main__':
-    remind_query()
-    remind_it()
+    remind_query_try()
+    remind_it_try()
     main()
