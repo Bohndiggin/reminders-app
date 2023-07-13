@@ -7,7 +7,6 @@ from fastapi import FastAPI, Request
 import psycopg2, requests, pytz
 import subprocess as sp
 from pydantic import BaseModel
-from discord_bot import start_bot
 
 load_dotenv()
 
