@@ -30,13 +30,13 @@ class GmailItem(BaseModel):
     subject: str
     message: str
     email: str
-    discord_id: int
+    discord_id: int # Discord ID. Might need to get from oauth
 
 class DiscordItem(BaseModel):
     subject: str
     message: str
     email: str
-    discord_id: int
+    discord_id: int # Discord ID. Might need to get from oauth
 
 def restart_ticker():
     global ticker
