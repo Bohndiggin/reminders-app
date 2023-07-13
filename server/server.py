@@ -30,10 +30,12 @@ class GmailItem(BaseModel):
     subject: str
     message: str
     email: str
+    discord_id: int
 
 class DiscordItem(BaseModel):
     subject: str
     message: str
+    email: str
     discord_id: int
 
 def restart_ticker():

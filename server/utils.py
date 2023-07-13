@@ -23,7 +23,8 @@ class Avenue: # Avenues are ways to remind the user.
         request_body = {
             'subject': self.parent_reminder_name,
             'message': self.message,
-            'email': self.email
+            'email': self.email,
+            'discord_id': os.getenv('TARGET_USER')
             # 'target_user': #TO BE USED AS A target for the reminder. Need a db of users.
         }
         request_json = json.dumps(request_body)
