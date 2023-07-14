@@ -8,5 +8,5 @@ server/ignore
 server/db_seed.py
 server/db_add_10_test.py
 server/credentials
-/reminders-app
+reminders-app/
 server/token.json
