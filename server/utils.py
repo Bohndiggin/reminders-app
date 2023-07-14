@@ -36,11 +36,11 @@ class Avenue: # Avenues are ways to remind the user.
 
 # FREQUENCY NEEDS TO BE A LIST OF DAYS OF THE WEEK
 class Reminder:
-    def __init__(self, id, reminder_name: str, target_time:datetime.time, target_time_timezone:str, fuzziness=1, frequency='Once', email='', date_made=datetime.time, avenues_sql='') -> None:
+    def __init__(self, id, reminder_name: str, target_time_local_to_server:datetime.time, target_time_timezone:str, fuzziness=1, frequency='Once', email='', date_made=datetime.time, avenues_sql='') -> None:
         self.id = id
         self.reminder_name = reminder_name
         today = datetime.date.today()
-        self.target_time = datetime.datetime.combine(today, target_time)
+        self.target_time_local_to_server = datetime.datetime.combine(today, target_time_local_to_server)
         self.target_time_timezone = target_time_timezone
         self.fuzziness = datetime.timedelta(minutes=fuzziness)
         self.avenues = []
@@ -73,8 +73,8 @@ class Reminder:
         pass
 
     def set_offset(self):
-        fore_fuzzy = self.target_time - self.fuzziness
-        aft_fuzzy = self.target_time + self.fuzziness
+        fore_fuzzy = self.target_time_local_to_server - self.fuzziness
+        aft_fuzzy = self.target_time_local_to_server + self.fuzziness
         self.real_offset = fake.date_time_between(start_date=fore_fuzzy, end_date=aft_fuzzy)
         self.real_offset = self.real_offset.replace(second=0, microsecond=0)
 

@@ -21,7 +21,7 @@ class ReminderItem(BaseModel):
     reminder_name: str
     email: str
     frequency: str
-    target_time: str
+    target_time_local_to_server: str
     target_time_timezone: str
     fuzziness: int
     avenues_sql: str
@@ -81,12 +81,12 @@ async def insert_reminder(reminder_request: ReminderItem):
     # Next section is to sort out timezones. The server is in US/Mountain time. All reminders are changed to US/Mountain, but the original Timezone is stored just in case.
     time_zone = pytz.timezone(reminder_request.target_time_timezone)
     target_time_zone = pytz.timezone('US/Mountain')
-    target_time = datetime.datetime.strptime(reminder_request.target_time, '%H:%M:%S')
-    target_time_non_local = time_zone.localize(target_time)
+    target_time_local_to_server = datetime.datetime.strptime(reminder_request.target_time_local_to_server, '%H:%M:%S')
+    target_time_non_local = time_zone.localize(target_time_local_to_server)
     localized_time = target_time_non_local.astimezone(target_time_zone)
     localized_time_str = localized_time.strftime('%H:%M:%S')
     query = """
-        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time, target_time_timezone, fuzziness, avenues_sql)
+        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time_local_to_server, target_time_timezone, fuzziness, avenues_sql)
         VALUES
                 (
                     %s, %s, %s, (current_date), %s, %s, %s, %s

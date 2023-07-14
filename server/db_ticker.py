@@ -41,7 +41,7 @@ def remind_query(): # This will query the database and create objects for each r
     cur.execute(f"""
                 SELECT * FROM "public"."reminders" reminders
                 WHERE reminders.frequency LIKE '%{now.weekday()}%'
-                AND target_time BETWEEN '{str_now}' and '{str_now_90}'
+                AND target_time_local_to_server BETWEEN '{str_now}' and '{str_now_90}'
                 """)
     answer = cur.fetchall()
     try:
