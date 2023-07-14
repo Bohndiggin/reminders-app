@@ -118,15 +118,15 @@ async def delete_reminder(reminder_request: RemindDeleteItem):
     try:
         cur.execute("""
             DELETE FROM Reminders WHERE id = {id};
-        """.format(**reminder_request))
+        """.format(id=reminder_request.id))
         conn.commit()
         cur.close()
         conn.close()
         restart_ticker()
-        return {"message": "Deletion Sucessful of {id}".format(**reminder_request)}
+        return {"message": "Deletion Sucessful of {id}".format(id=reminder_request.id)}
     except Exception as e:
         print('Deletion Error', e)
         cur.close()
         conn.close()
         restart_ticker()
-        return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(**reminder_request), "error": e}
+        return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(id=reminder_request.id), "error": e}
