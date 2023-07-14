@@ -4,9 +4,10 @@ import discord, os, datetime
 from gmail_reminder_server import *
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-import psycopg2, requests, pytz
+import psycopg2, pytz
 import subprocess as sp
 from pydantic import BaseModel
+from google_calendar import calendar_add
 
 load_dotenv()
 
@@ -32,10 +33,16 @@ class GmailItem(BaseModel):
     email: str
     discord_id: int | None # Discord ID. Might need to get from oauth
 
+class CalendarItem(BaseModel):
+    subject: str
+    message: str
+    email: str | None
+    discord_id: int | None # Discord ID. Might need to get from oauth
+
 class DiscordItem(BaseModel):
     subject: str
     message: str
-    email: str
+    email: str | None
     discord_id: int # Discord ID. Might need to get from oauth
 
 class RemindDeleteItem(BaseModel):
@@ -55,6 +62,11 @@ async def startup_event():
 @app.get('/')
 async def root():
     return {"message": "Hello World"}
+
+@app.post('/calendar')
+async def calendar_run(calendar_request: CalendarItem):
+    calendar_add(calendar_request.message, calendar_request.message)
+    return {"message": "success"}
 
 @app.post('/gmail')
 async def gmail_run(gmail_request: GmailItem):
