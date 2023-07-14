@@ -59,13 +59,13 @@ class NewReminderDialog(QDialog, ui_new_rmd.Ui_Dialog):
         }
         self.list_of_days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
         self.tz_map = {
-            'Eastern Standard Time': 'America/New_York',
-            'Central Standard Time': 'America/Chicago',
-            'Mountain Standard Time': 'America/Denver',
-            'Mountain Daylight Time': 'America/Denver',
-            'Pacific Standard Time': 'America/Los_Angeles',
-            'Alaskan Standard Time': 'America/Anchorage',
-            'Hawaiian Standard Time': 'Pacific/Honolulu'
+            'Eastern Standard Time': 'US/Eastern',
+            'Central Standard Time': 'US/Central',
+            'Mountain Standard Time': 'US/Mountain',
+            'Mountain Daylight Time': 'US/Mountain',
+            'Pacific Standard Time': 'US/Pacific',
+            'Alaskan Standard Time': 'US/Alaska',
+            'Hawaiian Standard Time': 'US/Hawaii'
         }
         self.checkBox.stateChanged.connect(self.checkbox_clicked)
         self.checkBox_2.stateChanged.connect(self.checkbox_clicked)

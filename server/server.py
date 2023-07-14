@@ -30,13 +30,16 @@ class GmailItem(BaseModel):
     subject: str
     message: str
     email: str
-    discord_id: int # Discord ID. Might need to get from oauth
+    discord_id: int | None # Discord ID. Might need to get from oauth
 
 class DiscordItem(BaseModel):
     subject: str
     message: str
     email: str
     discord_id: int # Discord ID. Might need to get from oauth
+
+class RemindDeleteItem(BaseModel):
+    id: int
 
 def restart_ticker():
     global ticker
@@ -106,7 +109,7 @@ async def insert_reminder(reminder_request: ReminderItem):
     return {"message": "reminder post sucsessful"}
 
 @app.delete('/reminder')
-async def delete_reminder(reminder_request: ReminderItem):
+async def delete_reminder(reminder_request: RemindDeleteItem):
     try:
         conn = psycopg2.connect(db_url)
         cur = conn.cursor()
