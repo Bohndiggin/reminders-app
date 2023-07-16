@@ -11,12 +11,13 @@ server_url = os.getenv('SERVER_URL')
 fake = Faker()
 
 class Avenue: # Avenues are ways to remind the user.
-    def __init__(self, url, parent_reminder_name: str, message, endpoint, email='') -> None:
+    def __init__(self, url, parent_reminder_name: str, message, endpoint, email='', discord_id=0) -> None:
         self.url = url
         self.parent_reminder_name = parent_reminder_name
         self.message = message
         self.endpoint = endpoint
         self.email = email
+        self.discord_id = discord_id
     
     def remind(self):
         url_to_request = self.url + self.endpoint
@@ -24,7 +25,7 @@ class Avenue: # Avenues are ways to remind the user.
             'subject': self.parent_reminder_name,
             'message': self.message,
             'email': self.email,
-            'discord_id': os.getenv('TARGET_USER')
+            'discord_id': self.discord_id
             # 'target_user': #TO BE USED AS A target for the reminder. Need a db of users.
         }
         request_json = json.dumps(request_body)
@@ -36,9 +37,10 @@ class Avenue: # Avenues are ways to remind the user.
 
 # FREQUENCY NEEDS TO BE A LIST OF DAYS OF THE WEEK
 class Reminder:
-    def __init__(self, id, reminder_name: str, target_time_local_to_server:datetime.time, target_time_timezone:str, fuzziness=1, frequency='Once', email='', date_made=datetime.time, avenues_sql='') -> None:
+    def __init__(self, id, reminder_name: str, user_id, target_time_local_to_server:datetime.time, target_time_timezone:str, fuzziness=1, frequency='Once', email='', date_made=datetime.time, avenues_sql='', discord_id='0') -> None:
         self.id = id
         self.reminder_name = reminder_name
+        self.user_id = user_id
         today = datetime.date.today()
         self.target_time_local_to_server = datetime.datetime.combine(today, target_time_local_to_server)
         self.target_time_timezone = target_time_timezone
@@ -49,6 +51,7 @@ class Reminder:
         self.email = email
         self.date_made = date_made
         self.avenues_sql = avenues_sql
+        self.discord_id = int(discord_id)
         self.set_offset()
         # print(self.real_offset)
     

@@ -98,7 +98,18 @@ async def insert_reminder(reminder_request: ReminderItem):
     localized_time = target_time_non_local.astimezone(target_time_zone)
     localized_time_str = localized_time.strftime('%H:%M:%S')
     query = """
-        INSERT INTO Reminders(reminder_name, email, frequency, date_made, target_time_local_to_server, target_time_timezone, fuzziness, avenues_sql)
+        SELECT * FROM Users
+        WHERE Users.email = %s
+    """
+    values = [
+        reminder_request.email
+    ]
+    cur.execute(query, values)
+    answer = cur.fetchone()
+    print(answer)
+    conn.commit()
+    query = """
+        INSERT INTO Reminders(reminder_name, user_id, frequency, date_made, target_time_local_to_server, target_time_timezone, fuzziness, avenues_sql)
         VALUES
                 (
                     %s, %s, %s, (current_date), %s, %s, %s, %s
@@ -106,7 +117,7 @@ async def insert_reminder(reminder_request: ReminderItem):
     """
     values = [
         reminder_request.reminder_name,
-        reminder_request.email,
+        answer[0],
         reminder_request.frequency,
         localized_time_str,
         reminder_request.target_time_timezone,

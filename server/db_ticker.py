@@ -39,7 +39,8 @@ def remind_query(): # This will query the database and create objects for each r
     str_now_90 = now_90.strftime('%H:%M:%S')
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(f"""
-                SELECT * FROM "public"."reminders" reminders
+                SELECT * FROM "public"."reminders" AS reminders
+                JOIN Users ON reminders.user_id = Users.user_id
                 WHERE reminders.frequency LIKE '%{now.weekday()}%'
                 AND target_time_local_to_server BETWEEN '{str_now}' and '{str_now_90}'
                 """)
