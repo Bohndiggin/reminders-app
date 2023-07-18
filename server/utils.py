@@ -1,4 +1,4 @@
-import discord, schedule, asyncio, time, requests, os, json, pytz
+import discord, schedule, asyncio, time, requests, os, json, pytz, random
 from discord.ext import commands
 from dotenv import load_dotenv
 import datetime
@@ -53,18 +53,27 @@ class Reminder:
         self.avenues_sql = avenues_sql
         self.discord_id = int(discord_id)
         self.set_offset()
+        self.used_avenues = []
         # print(self.real_offset)
     
     def remind(self): # 
         now = datetime.datetime.now()
         now_no_s_ms = now.replace(second=0, microsecond=0)
-        if now_no_s_ms == self.real_offset:
-            # print('same')
-            for i in self.avenues:
-                i.remind()
-            return True
-        else:
+        if now_no_s_ms != self.real_offset:
             return False
+        if len(self.avenues) == 0:
+            random.shuffle(self.used_avenues)
+            self.avenues = self.used_avenues
+            self.used_avenues = []
+        if len(self.avenues) + len(self.used_avenues) == 1:
+            self.avenues[0].remind()
+            return True
+        if len(self.avenues) > 1:
+            self.avenues[-1].remind()
+            self.used_avenues.append(self.avenues[-1])
+            self.avenues.pop(-1)
+            return True
+        
 
     def complete(self):
         self.complete_status = True
