@@ -52,6 +52,7 @@ class Reminder:
         self.date_made = date_made
         self.avenues_sql = avenues_sql
         self.discord_id = int(discord_id)
+        print(self.discord_id)
         self.set_offset()
         self.used_avenues = []
         # print(self.real_offset)
@@ -65,14 +66,14 @@ class Reminder:
             random.shuffle(self.used_avenues)
             self.avenues = self.used_avenues
             self.used_avenues = []
-        if len(self.avenues) + len(self.used_avenues) == 1:
-            self.avenues[0].remind()
-            return True
-        if len(self.avenues) > 1:
-            self.avenues[-1].remind()
-            self.used_avenues.append(self.avenues[-1])
-            self.avenues.pop(-1)
-            return True
+        # if len(self.avenues) + len(self.used_avenues) == 1:
+        #     self.avenues[-1].remind()
+        #     return True
+        # if len(self.avenues) > 1:
+        self.avenues[-1].remind()
+        self.used_avenues.append(self.avenues[-1])
+        self.avenues.pop(-1)
+        return True
         
 
     def complete(self):

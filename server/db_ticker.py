@@ -23,7 +23,7 @@ def reminder_func_paralell(obj, successfully_reminded): # This allows the main r
         print(f'reminded! ID: {obj.id} __ Offset: {obj.real_offset}')
     elif reminder_worked == False:
         pass
-    return 'complete'
+    return {"message": "success"}
 
 def remind_query(): # This will query the database and create objects for each reminder. Should fire every 60 min. It then gathers the next 90 min (on a -2 min offset) of reminders.
     global next_90, successfully_reminded
