@@ -95,7 +95,7 @@ class Reminder:
         return f'{self.reminder_name}, a task you need to do {self.frequency}.'
     
     def add_avenue(self=None, url='Server', endpoint='/endpoint'):
-        new_avenue = Avenue(url, self.reminder_name, str(self), endpoint, self.email)
+        new_avenue = Avenue(url, self.reminder_name, str(self), endpoint, self.email, self.discord_id)
         self.avenues.append(new_avenue)
         
     
