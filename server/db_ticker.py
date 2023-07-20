@@ -48,7 +48,7 @@ def remind_query(): # This will query the database and create objects for each r
                                 WHEN EXTRACT(WEEK FROM reminders.date_made)::int % 2 = EXTRACT(WEEK FROM CURRENT_DATE)::int % 2 THEN 'Include'
                                 ELSE 'Exclude'
                             END
-                        ELSE 'Exclude'
+                        ELSE 'Include'
                     END AS include_row 
                 FROM "public"."reminders" AS reminders
                 JOIN Users ON reminders.user_id = Users.user_id
