@@ -41,19 +41,19 @@ def remind_query(): # This will query the database and create objects for each r
     cur.execute(f"""
                 SELECT sub_query.id, sub_query.reminder_name, sub_query.frequency, sub_query.date_made, sub_query.target_time_local_to_server, sub_query.target_time_timezone, sub_query.fuzziness, sub_query.avenues_sql, sub_query.email, sub_query.discord_id
                 FROM (
-                SELECT *,
-                    CASE
-                        WHEN reminders.frequency LIKE '%every_other%' THEN
-                            CASE
-                                WHEN EXTRACT(WEEK FROM reminders.date_made)::int % 2 = EXTRACT(WEEK FROM CURRENT_DATE)::int % 2 THEN 'Include'
-                                ELSE 'Exclude'
-                            END
-                        ELSE 'Include'
-                    END AS include_row 
-                FROM "public"."reminders" AS reminders
-                JOIN Users ON reminders.user_id = Users.user_id
-                WHERE reminders.frequency LIKE '%{now.weekday()}%'
-                AND target_time_local_to_server BETWEEN '{str_now}' and '{str_now_90}'
+                    SELECT *,
+                        CASE
+                            WHEN reminders.frequency LIKE '%every_other%' THEN
+                                CASE
+                                    WHEN ((CURRENT_DATE - reminders.date_made) / 7) % 2 = 0 THEN 'Include'
+                                    ELSE 'Exclude'
+                                END
+                            ELSE 'Include'
+                        END AS include_row 
+                    FROM "public"."reminders" AS reminders
+                    JOIN Users ON reminders.user_id = Users.user_id
+                    WHERE reminders.frequency LIKE '%{now.weekday()}%'
+                    AND target_time_local_to_server BETWEEN '{str_now}' and '{str_now_90}'
                 ) AS sub_query
                 WHERE sub_query.include_row = 'Include'
                 """)
