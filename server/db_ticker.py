@@ -39,7 +39,7 @@ def remind_query(): # This will query the database and create objects for each r
     str_now_90 = now_90.strftime('%H:%M:%S')
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute(f"""
-                SELECT sub_query.id, sub_query.reminder_name, sub_query.frequency, sub_query.date_made, sub_query.target_time_local_to_server, sub_query.target_time_timezone, sub_query.fuzziness, sub_query.avenues_sql, sub_query.email, sub_query.discord_id
+                SELECT sq.id, sq.reminder_name, sq.frequency, sq.date_made, sq.target_time_local_to_server, sq.target_time_timezone, sq.fuzziness, sq.avenues_sql, sq.email, sq.discord_id
                 FROM (
                     SELECT *,
                         CASE
@@ -54,8 +54,8 @@ def remind_query(): # This will query the database and create objects for each r
                     JOIN Users ON reminders.user_id = Users.user_id
                     WHERE reminders.frequency LIKE '%{now.weekday()}%'
                     AND target_time_local_to_server BETWEEN '{str_now}' and '{str_now_90}'
-                ) AS sub_query
-                WHERE sub_query.include_row = 'Include'
+                ) AS sq
+                WHERE sq.include_row = 'Include'
                 """)
     answer = cur.fetchall()
     try:

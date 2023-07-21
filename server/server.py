@@ -65,8 +65,8 @@ async def root():
 
 @app.post('/calendar')
 async def calendar_run(calendar_request: CalendarItem):
-    calendar_add(calendar_request.message, calendar_request.message)
-    return {"message": "success"}
+    # calendar_add(calendar_request.message, calendar_request.message)
+    return {"message": "NOT READY"}
 
 @app.post('/gmail')
 async def gmail_run(gmail_request: GmailItem):
@@ -106,7 +106,7 @@ async def insert_reminder(reminder_request: ReminderItem):
     ]
     cur.execute(query, values)
     answer = cur.fetchone()
-    print(answer)
+    
     conn.commit()
     query = """
         INSERT INTO Reminders(reminder_name, user_id, frequency, date_made, target_time_local_to_server, target_time_timezone, fuzziness, avenues_sql)

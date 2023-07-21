@@ -62,17 +62,7 @@ class Reminder:
         now_no_s_ms = now.replace(second=0, microsecond=0)
         if now_no_s_ms != self.real_offset:
             return False
-        if len(self.avenues) == 0:
-            random.shuffle(self.used_avenues)
-            self.avenues = self.used_avenues
-            self.used_avenues = []
-        # if len(self.avenues) + len(self.used_avenues) == 1:
-        #     self.avenues[-1].remind()
-        #     return True
-        # if len(self.avenues) > 1:
-        self.avenues[-1].remind()
-        self.used_avenues.append(self.avenues[-1])
-        self.avenues.pop(-1)
+        random.choice(self.avenues).remind()
         return True
         
 
