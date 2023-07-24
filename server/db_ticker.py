@@ -27,6 +27,7 @@ def reminder_func_paralell(obj, successfully_reminded): # This allows the main r
 
 def remind_query(): # This will query the database and create objects for each reminder. Should fire every 60 min. It then gathers the next 90 min (on a -2 min offset) of reminders.
     global next_90, successfully_reminded
+    successfully_reminded = []
     try:
         conn = psycopg2.connect(db_url)
         print('Connected to Database...')
@@ -83,14 +84,10 @@ def remind_it(): # makes a list of reminder processes and starts them all.
     try:
         for i in next_90:
             # print(i)
-            if i.id in successfully_reminded:
-                print('skipped: already reminded')
-                continue
-            else:
-                process_list = []
-                process_list.append(Process(target=reminder_func_paralell, kwargs={"obj": i, "successfully_reminded": successfully_reminded}))
-                for j in process_list:
-                    j.start()
+            process_list = []
+            process_list.append(Process(target=reminder_func_paralell, kwargs={"obj": i, "successfully_reminded": successfully_reminded}))
+            for j in process_list:
+                j.start()
         next_90 = [x for x in next_90 if x.id not in successfully_reminded]
         print('______________', datetime.datetime.now())
     except Exception as e:

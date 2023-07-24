@@ -1,6 +1,5 @@
-from discord.ext import commands
 import asyncio
-import discord, os, datetime
+import os, datetime
 from gmail_reminder_server import *
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -8,13 +7,14 @@ import psycopg2, pytz
 import subprocess as sp
 from pydantic import BaseModel
 from google_calendar import calendar_add
+from discord_reminder_server import bot, send_reminder_discord
 
 load_dotenv()
 
 app = FastAPI()
-intents = discord.Intents.all()
+# intents = discord.Intents.all()
 db_url = os.getenv("DB_API")
-bot = commands.Bot(command_prefix='!', intents=intents)
+# bot = commands.Bot(command_prefix='!', intents=intents)
 ticker = sp.Popen(['python', 'db_ticker.py'])
 # bot.run(os.getenv('TOKEN'))
 
@@ -26,6 +26,11 @@ class ReminderItem(BaseModel):
     target_time_timezone: str
     fuzziness: int
     avenues_sql: str
+
+class DelayRequestItem(BaseModel):
+    reminder_name: str
+    email: str
+    delay_length: int
 
 class GmailItem(BaseModel):
     subject: str
@@ -56,8 +61,6 @@ def restart_ticker():
 @app.on_event('startup')
 async def startup_event():
     asyncio.create_task(bot.start(os.getenv('DISCORD_TOKEN')))
-    await asyncio.sleep(4)
-    print(f'{bot.user} has connected to discord!')
 
 @app.get('/')
 async def root():
@@ -75,10 +78,7 @@ async def gmail_run(gmail_request: GmailItem):
 
 @app.post("/discord")
 async def start_bot(discord_item: DiscordItem):
-    user = await bot.fetch_user(discord_item.discord_id)
-    await user.send(discord_item.message)
-    print('sent to ' , discord_item.discord_id)
-    # await bot.close()
+    send_reminder_discord(discord_item=discord_item)
     return {"status": "success"}
 
 # Need to rewrite the server to only add reminders and times to a database and then it'll tick forward and send reminders as needed.
@@ -153,3 +153,27 @@ async def delete_reminder(reminder_request: RemindDeleteItem):
         conn.close()
         restart_ticker()
         return {"message": "Deletion NOT Sucessful of {id}, for reason ".format(id=reminder_request.id), "error": e}
+
+@app.post('/delay')
+async def delay_task(delay_request: DelayRequestItem): 
+    # HOW DO? Maybe the object can handle the update to the avenue? What happens to the reminded??
+    # try:
+    #     conn = psycopg2.connect(db_url)
+    #     cur = conn.cursor()
+    # except Exception as e:
+    #     print(e)
+    # query = """
+    #     UPDATE Reminders
+    #     SET target_time_local_to_server = %s
+    #     FROM Users AS u
+    #     WHERE Reminders.user_id = u.user_id
+    #     AND u.email = %s
+    #     AND Reminders.reminder_name = %s
+    # """
+    # cur.execute(query, values)
+    # conn.commit()
+    # cur.close()
+    # conn.close()
+    # restart_ticker()
+    # return {"message": "Deletion Sucessful of {id}".format(id=reminder_request.id)}
+    pass
