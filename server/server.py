@@ -8,6 +8,8 @@ import subprocess as sp
 from pydantic import BaseModel
 from google_calendar import calendar_add
 from discord_reminder_server import bot, send_reminder_discord
+import logging
+from logging.handlers import RotatingFileHandler
 
 load_dotenv()
 
@@ -16,6 +18,26 @@ app = FastAPI()
 db_url = os.getenv("DB_API")
 # bot = commands.Bot(command_prefix='!', intents=intents)
 ticker = sp.Popen(['python', 'db_ticker.py'])
+REMINDERSEND = 25 # TODO change to only write remindersend info
+logging.addLevelName(REMINDERSEND, 'REMINDERSEND')
+
+def reminder_send_log(self, message, *args, **kws):
+    if self.isEnabledFor(REMINDERSEND):
+        self._log(REMINDERSEND, message, args, **kws)
+
+logging.Logger.reminder_send_log = reminder_send_log
+
+log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
+log_file = './log'
+my_handler = RotatingFileHandler(log_file, mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+my_handler.setFormatter(log_formatter)
+my_handler.setLevel(logging.INFO)
+
+
+app_log = logging.getLogger('root')
+app_log.setLevel(logging.INFO)
+app_log.addHandler(my_handler)
+
 # bot.run(os.getenv('TOKEN'))
 
 class ReminderItem(BaseModel):
@@ -61,6 +83,7 @@ def restart_ticker():
 @app.on_event('startup')
 async def startup_event():
     asyncio.create_task(bot.start(os.getenv('DISCORD_TOKEN')))
+    app_log.info('Startup Complete, Bot Ready')
 
 @app.get('/')
 async def root():
@@ -74,11 +97,13 @@ async def calendar_run(calendar_request: CalendarItem):
 @app.post('/gmail')
 async def gmail_run(gmail_request: GmailItem):
     gmail_bot_main(gmail_request.subject, gmail_request.message, gmail_request.email)
+    app_log.reminder_send_log(f'Email Message: {gmail_request.message} Sent to user: {gmail_request.email}')
     return {"message": "success"}
 
 @app.post("/discord")
 async def start_bot(discord_item: DiscordItem):
-    send_reminder_discord(discord_item=discord_item)
+    await send_reminder_discord(discord_item=discord_item)
+    app_log.reminder_send_log(f'Discord Message: {discord_item.message} Sent to user: {discord_item.discord_id}')
     return {"status": "success"}
 
 # Need to rewrite the server to only add reminders and times to a database and then it'll tick forward and send reminders as needed.

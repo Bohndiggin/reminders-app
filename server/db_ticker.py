@@ -15,12 +15,21 @@ server_url = os.getenv('SERVER_URL')
 
 next_90 = []
 successfully_reminded = []
+reminder_log_1000 = []
 
 def reminder_func_paralell(obj, successfully_reminded): # This allows the main remind_it() to spawn more reminders than can be processed in a minute, that way we don't run out of time to remind.
+    global reminder_log_1000
     reminder_worked = obj.remind() # if the reminder suceeded, it returns true
     if reminder_worked == True:
         successfully_reminded.append(obj.id)
         print(f'reminded! ID: {obj.id} __ Offset: {obj.real_offset}')
+        if len(reminder_log_1000) < 1000:
+            reminder_log_1000.append({
+                "reminder": obj,
+                "time_reminded": datetime.datetime.now()
+            })
+        else:
+            pass# reminder_log_1000. # make it a set
     elif reminder_worked == False:
         pass
     return {"message": "success"}

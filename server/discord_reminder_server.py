@@ -9,6 +9,12 @@ intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+class DiscordItem(BaseModel):
+    subject: str
+    message: str
+    email: str | None
+    discord_id: int
+
 @bot.event
 async def on_ready():
     print("Logged in as a bot {0.user}".format(bot))
@@ -22,12 +28,6 @@ async def hello(ctx):
 @bot.command(name='delay')
 async def hello(ctx):
     await ctx.send(f'Delaying task!')
-
-class DiscordItem(BaseModel):
-    subject: str
-    message: str
-    email: str | None
-    discord_id: int
 
 async def send_reminder_discord(discord_item: DiscordItem):
     user = await bot.fetch_user(discord_item.discord_id)

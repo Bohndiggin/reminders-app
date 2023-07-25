@@ -10,3 +10,5 @@ server/db_add_10_test.py
 server/credentials
 reminders-app/
 server/token.json
+log
+server/log
