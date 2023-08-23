@@ -63,7 +63,7 @@ def remind_query(): # This will query the database and create objects for each r
                     FROM "public"."reminders" AS reminders
                     JOIN Users ON reminders.user_id = Users.user_id
                     WHERE reminders.frequency LIKE '%{now.weekday()}%'
-                    AND target_time_local_to_server BETWEEN '{str_now}' and '{str_now_90}'
+                    AND reminders.target_time_local_to_server BETWEEN '{str_now}' and '{str_now_90}'
                 ) AS sq
                 WHERE sq.include_row = 'Include'
                 """)
