@@ -3,6 +3,7 @@ import os, datetime
 from gmail_reminder_server import *
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 import psycopg2, pytz
 import subprocess as sp
 from pydantic import BaseModel
@@ -10,13 +11,14 @@ from google_calendar import calendar_add
 from discord_reminder_server import bot, send_reminder_discord
 import logging
 from logging.handlers import RotatingFileHandler
+from starlette.responses import FileResponse 
 
 load_dotenv()
 
 app = FastAPI()
 # intents = discord.Intents.all()
 db_url = os.getenv("DB_API")
-# bot = commands.Bot(command_prefix='!', intents=intents)
+app.mount('/', StaticFiles(directory="../client", html=True), name='html')
 ticker = sp.Popen(['python', 'db_ticker.py'])
 REMINDERSEND = 25 # TODO change to only write remindersend info
 logging.addLevelName(REMINDERSEND, 'REMINDERSEND')
@@ -86,8 +88,8 @@ async def startup_event():
     app_log.info('Startup Complete, Bot Ready')
 
 @app.get('/')
-async def root():
-    return {"message": "Hello World"}
+async def read_index():
+    return FileResponse('../client/index.html')
 
 @app.post('/calendar')
 async def calendar_run(calendar_request: CalendarItem):

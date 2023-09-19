@@ -3,3 +3,4 @@ let addReminderButton = document.getElementById('addButton')
 
 function addReminderFunction() {}
 
+addReminderButton.addEventListener('click', addReminderFunction)

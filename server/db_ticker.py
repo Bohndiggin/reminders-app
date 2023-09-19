@@ -58,7 +58,8 @@ def remind_query(): # This will query the database and create objects for each r
                                     WHEN ((CURRENT_DATE - reminders.date_made) / 7) % 2 = 0 THEN 'Include'
                                     ELSE 'Exclude'
                                 END
-                            ELSE 'Include'
+                            WHEN reminders.frequency LIKE '%every %' THEN 'Include'
+                            ELSE 'Exclude'
                         END AS include_row 
                     FROM "public"."reminders" AS reminders
                     JOIN Users ON reminders.user_id = Users.user_id
